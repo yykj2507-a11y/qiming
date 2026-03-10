@@ -83,6 +83,12 @@ export async function POST(req: NextRequest) {
 
     if (!geminiRes.ok) {
       const error = await geminiRes.text();
+      const statusCode = geminiRes.status;
+      console.error("[Gemini API] 请求失败:", {
+        statusCode,
+        statusText: geminiRes.statusText,
+        errorBody: error,
+      });
       return NextResponse.json(
         { error: "Gemini API error", detail: error },
         { status: 502 },
@@ -123,6 +129,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(parsed);
   } catch (error) {
     const message = String(error);
+    console.error("[Gemini API] 未预期错误:", message, error);
 
     // 本地开发环境下，如果网络无法访问 Gemini，则返回一些示例数据，方便你调试前端。
     if (process.env.NODE_ENV !== "production") {
