@@ -60,15 +60,16 @@ export async function POST(req: NextRequest) {
     {
       "name": "名字1",
       "pinyin": "拼音1（使用标准汉语拼音，小写，音节之间用空格分隔）",
-      "meaning": "寓意解析1（简洁、自然的中文描述）",
-      "source": "简短说明名字的灵感来源，例如：诗词、自然意象、字形结构、品牌调性等"
+      "meaning": "寓意解析1（简洁、自然的中文描述，全句不超过 30 个汉字）",
+      "source": "灵感来源（例如诗词 / 自然意象 / 品牌调性等，全句不超过 15 个汉字）"
     },
     ...
   ]
 }
 3. 一共返回 5 个名字方案。
 4. 每个名字都要贴合类别与关键词的语义，风格偏好仅作为参考引导，不是硬性限制。
-5. 确保整个返回内容可以被 JSON.parse 直接解析，不出现任何多余字符。
+5. 尽量控制整体文字长度，回复要短、干净，不要扩写成长段落。
+6. 确保整个返回内容可以被 JSON.parse 直接解析，不出现任何多余字符。
 `.trim();
 
   const userPrompt = `
@@ -92,7 +93,9 @@ export async function POST(req: NextRequest) {
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.8,
+          temperature: 0.6,
+          top_p: 0.9,
+          max_tokens: 480,
         }),
       },
     );
