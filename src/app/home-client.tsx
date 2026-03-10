@@ -61,6 +61,7 @@ interface NameSuggestion {
   name: string;
   pinyin: string;
   meaning: string;
+  source?: string;
 }
 
 export default function HomePageClient() {
@@ -98,19 +99,20 @@ export default function HomePageClient() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "生成失败，请稍后重试。");
+        console.error("生成名字接口错误:", data);
+        throw new Error("服务器繁忙，请稍后再试。");
       }
 
       const data = (await res.json()) as { names?: NameSuggestion[] };
       if (!data.names || !Array.isArray(data.names)) {
-        throw new Error("返回数据格式异常。");
+        console.error("返回数据格式异常:", data);
+        throw new Error("服务器繁忙，请稍后再试。");
       }
 
       setNames(data.names);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "生成失败，请稍后重试。",
-      );
+      console.error("生成名字异常:", err);
+      setError("服务器繁忙，请稍后再试。");
     } finally {
       setLoading(false);
     }
@@ -252,8 +254,8 @@ export default function HomePageClient() {
               )}
               {!error && (
                 <p className="text-xs text-slate-400">
-                  当前模式：{activeCategory}，点击“生成名字”后将实时调用 Gemini
-                  接口，返回 5 个名字方案。
+                  当前模式：{activeCategory}，点击“生成名字”后将调用起名模型返回 5
+                  个名字方案。
                 </p>
               )}
             </div>
@@ -316,6 +318,11 @@ export default function HomePageClient() {
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">
                     {item.meaning}
                   </p>
+                  {item.source && (
+                    <p className="mt-2 text-xs text-slate-400">
+                      灵感来源：{item.source}
+                    </p>
+                  )}
                 </article>
               ))
             ) : (
